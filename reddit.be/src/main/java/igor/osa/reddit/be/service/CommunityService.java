@@ -26,7 +26,7 @@ import igor.osa.reddit.be.repository.RuleRepository;
 @Service
 public class CommunityService {
 	
-	private static final Logger LOGGER = LogManager.getLogger(CommentService.class);
+	private static final Logger LOGGER = LogManager.getLogger(CommunityService.class);
 	
 	@Autowired
 	private CommunityRepository communityRepository;
