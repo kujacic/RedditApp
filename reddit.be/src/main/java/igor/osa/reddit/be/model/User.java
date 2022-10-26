@@ -43,16 +43,16 @@ public class User {
 	@Column(name = "email", unique = false, nullable = false)
 	private String email;
 	
-	@Column(name = "avatar", unique = false, nullable = false)
+	@Column(name = "avatar", unique = false, nullable = true)
 	private String avatar;
 	
 	@Column(name = "registration_date", unique = false, nullable = false)
 	private LocalDate registrationDate;
 	
-	@Column(name = "description", unique = false, nullable = false)
+	@Column(name = "description", unique = false, nullable = true)
 	private String description;
 	
-	@Column(name = "displayName", unique = false, nullable = false)
+	@Column(name = "displayName", unique = false, nullable = true)
 	private String displayName;
 	
 	@Column(name = "userType", insertable = false, updatable = false)

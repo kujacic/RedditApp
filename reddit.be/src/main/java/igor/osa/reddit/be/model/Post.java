@@ -52,4 +52,7 @@ public class Post {
 	
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Report> reports;
+	
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Reaction> reactions;
 }

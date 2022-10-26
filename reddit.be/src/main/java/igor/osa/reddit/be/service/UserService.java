@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import igor.osa.reddit.be.dto.UserDTO;
@@ -21,6 +22,9 @@ public class UserService {
 	
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+    private PasswordEncoder passwordEncoder;
 	
 	@Autowired
 	private ModelMapper mapper;
@@ -42,6 +46,7 @@ public class UserService {
 	
 	public User create(UserDTO dto) {
 		User user = convertToEntity(dto);
+		user.setPassword(passwordEncoder.encode(dto.getPassword()));
 		if(user.getRegistrationDate() == null) {
 			user.setRegistrationDate(LocalDate.now());
 		}

@@ -11,5 +11,5 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @DiscriminatorValue("Admin")
 public class Administrator extends User {
-	
+
 }

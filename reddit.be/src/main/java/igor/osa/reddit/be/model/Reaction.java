@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,9 +32,12 @@ public class Reaction {
 	@Column(name = "timestamp", unique = false, nullable = false)
 	private LocalDate timeStamp;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private User user;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Post post;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Comment comment;
 }

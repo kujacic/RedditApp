@@ -43,4 +43,7 @@ public class Comment {
 	
 	@OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Report> reports;
+	
+	@OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Reaction> reactions;
 }
