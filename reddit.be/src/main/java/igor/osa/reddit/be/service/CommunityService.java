@@ -1,8 +1,11 @@
 package igor.osa.reddit.be.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.ListUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
@@ -64,8 +67,19 @@ public class CommunityService {
 		return community;
 	}
 	
+	public Community getByName(String name) {
+		Community community = communityRepository.findByName(name);
+		if(community == null) {
+			LOGGER.error("Community with name: {} doesn't exist!", name);
+		}
+		return community;
+	}
+	
 	public Community create(CommunityDTO dto) {
 		Community community = convertToEntity(dto);
+		community.setCreationDate(LocalDate.now().toString());
+		community.setSuspended(false);
+		community.setSuspendedReason("");
 		communityRepository.save(community);
 		LOGGER.info("Successfully created community: {}", community);
 		return community;
@@ -79,44 +93,69 @@ public class CommunityService {
 		communityRepository.delete(community);
 		LOGGER.info("Successfully deleted comment with id: {}", community.getId());
 	}
+	
+	public boolean checkIfCommunityExists(CommunityDTO dto) {
+		Community existing = communityRepository.findByName(dto.getName());
+		if (existing != null) {
+			LOGGER.error("Community with name: {} already exists!", dto.getName());
+			return true;
+		}
+		return false;
+	}
 
 	//CONVERSIONS
 	
 	public CommunityDTO convertToDTO(Community community) {
 		CommunityDTO communityDTO = mapper.map(community, CommunityDTO.class);
-		for (Banned banned : community.getBannedList()) {
-			communityDTO.getBannedListIds().add(banned.getId());
+		
+		List<Integer> bannedListIds = new ArrayList<>();
+		for (Banned banned : ListUtils.emptyIfNull(community.getBannedList())) {
+			bannedListIds.add(banned.getId());
 		}
-		for (Rule rule : community.getRules()) {
-			communityDTO.getRulesIds().add(rule.getId());
+		communityDTO.setBannedListIds(bannedListIds);
+		
+		List<Integer> rulesIds = new ArrayList<>();
+		for (Rule rule : ListUtils.emptyIfNull(community.getRules())) {
+			rulesIds.add(rule.getId());
 		}
-		for (Post post : community.getPosts()) {
-			communityDTO.getPostsIds().add(post.getId());
+		communityDTO.setRulesIds(rulesIds);
+		
+		List<Integer> postIds = new ArrayList<>();
+		for (Post post : ListUtils.emptyIfNull(community.getPosts())) {
+			postIds.add(post.getId());
 		}
-		for (Moderator moderator : community.getModerators()) {
-			communityDTO.getModeratorsIds().add(moderator.getId());
+		communityDTO.setPostsIds(postIds);
+		
+		List<Integer> moderatorIds = new ArrayList<>();
+		for (Moderator moderator : ListUtils.emptyIfNull(community.getModerators())) {
+			moderatorIds.add(moderator.getId());
 		}
-		for (Flair flair : community.getFlairs()) {
-			communityDTO.getFlairsIds().add(flair.getId());
+		communityDTO.setModeratorsIds(moderatorIds);
+		
+		List<Integer> flairIds = new ArrayList<>();
+		for (Flair flair : ListUtils.emptyIfNull(community.getFlairs())) {
+			flairIds.add(flair.getId());
 		}
+		communityDTO.setFlairsIds(flairIds);
+		
 		return communityDTO;
 	}
 	
 	public Community convertToEntity(CommunityDTO communityDTO) {
 		Community community = mapper.map(communityDTO, Community.class);
-		for (Integer id : communityDTO.getBannedListIds()) {
+		for (Integer id : ListUtils.emptyIfNull(communityDTO.getBannedListIds())) {
 			community.getBannedList().add(bannedRepository.findById(id).orElse(null));
 		}
-		for (Integer id : communityDTO.getRulesIds()) {
+		for (Integer id : ListUtils.emptyIfNull(communityDTO.getRulesIds())) {
 			community.getRules().add(ruleRepository.findById(id).orElse(null));
 		}
-		for (Integer id : communityDTO.getPostsIds()) {
+		for (Integer id : ListUtils.emptyIfNull(communityDTO.getPostsIds())) {
 			community.getPosts().add(postRepository.findById(id).orElse(null));
 		}
-		for (Integer id : communityDTO.getModeratorsIds()) {
+		for (Integer id : ListUtils.emptyIfNull(communityDTO.getModeratorsIds())) {
 			community.getModerators().add(moderatorRepository.findById(id).orElse(null));
 		}
-		for (Integer id : communityDTO.getFlairsIds()) {
+		for (Integer id : ListUtils.emptyIfNull(communityDTO.getFlairsIds())) {
 			community.getFlairs().add(flairRepository.findById(id).orElse(null));
 		}
 		return community;

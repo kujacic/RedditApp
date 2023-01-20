@@ -59,9 +59,12 @@ public class UserController {
 	
 	@PostMapping
 	public ResponseEntity<UserDTO> create(@RequestBody UserDTO userDTO){
+		if (userService.checkIfUserExists(userDTO)) {
+			return new ResponseEntity<UserDTO>(HttpStatus.BAD_REQUEST);
+		}
 		User user = userService.create(userDTO);
 		if (user == null) {
-			return new ResponseEntity<UserDTO>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<UserDTO>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} else {
 			return new ResponseEntity<UserDTO>(userService.convertToDTO(user), HttpStatus.OK);
 		}
@@ -98,7 +101,7 @@ public class UserController {
             UserDetails details = userDetailsService.loadUserByUsername(userDTO.getUsername());
             return new ResponseEntity<String>(tokenUtils.generateToken(details), HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<String>("Invalid login", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<String>("Login failed", HttpStatus.BAD_REQUEST);
         }
     }
 }

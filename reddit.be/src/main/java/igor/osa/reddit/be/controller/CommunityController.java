@@ -42,9 +42,12 @@ public class CommunityController {
 	
 	@PostMapping
 	public ResponseEntity<CommunityDTO> create(@RequestBody CommunityDTO communityDTO){
+		if (communityService.checkIfCommunityExists(communityDTO)) {
+			return new ResponseEntity<CommunityDTO>(HttpStatus.BAD_REQUEST);
+		}
 		Community community = communityService.create(communityDTO);
 		if (community == null) {
-			return new ResponseEntity<CommunityDTO>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<CommunityDTO>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} else {
 			return new ResponseEntity<CommunityDTO>(communityService.convertToDTO(community), HttpStatus.OK);
 		}

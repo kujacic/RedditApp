@@ -44,9 +44,24 @@ public class UserService {
 		return user;
 	}
 	
+	public boolean checkIfUserExists(UserDTO dto) {
+		User existingUsername = userRepository.findByUsername(dto.getUsername());
+		if (existingUsername != null) {
+			LOGGER.error("User with username: {} already exists!", dto.getUsername());
+			return true;
+		}
+		User existingEmail = userRepository.findByEmail(dto.getEmail());
+		if (existingEmail != null) {
+			LOGGER.error("User with email: {} already exists!", dto.getEmail());
+			return true;
+		}
+		return false;
+	}
+	
 	public User create(UserDTO dto) {
 		User user = convertToEntity(dto);
 		user.setPassword(passwordEncoder.encode(dto.getPassword()));
+		user.setUserType("User");
 		if(user.getRegistrationDate() == null) {
 			user.setRegistrationDate(LocalDate.now());
 		}

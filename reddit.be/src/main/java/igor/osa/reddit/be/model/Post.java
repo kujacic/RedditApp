@@ -32,7 +32,7 @@ public class Post {
 	@Column(name = "text", unique = false, nullable = false)
 	private String text;
 	
-	@Column(name = "creation_date", unique = false, nullable = true)
+	@Column(name = "creation_date", unique = false, nullable = false)
 	private LocalDate creationDate;
 	
 	@Column(name = "image_path", unique = false, nullable = true)

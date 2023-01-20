@@ -39,7 +39,7 @@ public class Community {
 	@Column(name = "suspended", nullable = false)
 	private boolean isSuspended;
 	
-	@Column(name = "suspended_reason", unique = false, nullable = false)
+	@Column(name = "suspended_reason", unique = false, nullable = true)
 	private String suspendedReason;
 	
 	@OneToMany(mappedBy = "community", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

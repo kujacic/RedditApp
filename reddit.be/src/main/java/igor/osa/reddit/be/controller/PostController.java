@@ -12,10 +12,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import igor.osa.reddit.be.dto.PostDTO;
+import igor.osa.reddit.be.model.Community;
 import igor.osa.reddit.be.model.Post;
+import igor.osa.reddit.be.service.CommunityService;
 import igor.osa.reddit.be.service.PostService;
 
 @RestController
@@ -24,6 +27,9 @@ public class PostController {
 	
 	@Autowired
 	private PostService postService;
+	
+	@Autowired
+	private CommunityService communityService;
 	
 	@GetMapping
 	public ResponseEntity<List<PostDTO>> getAll(){ 
@@ -68,6 +74,17 @@ public class PostController {
 		} else {
 			postService.delete(post);
 			return new ResponseEntity<Void>(HttpStatus.OK);
+		}
+	}
+	
+	@GetMapping(value = "/community")
+	public ResponseEntity<List<PostDTO>> getByCommunity(@RequestParam(value="communityName") String communityName){
+		Community community = communityService.getByName(communityName);
+		List<PostDTO> posts = postService.convertListToDTO(community.getPosts());
+		if(posts == null) {
+			return new ResponseEntity<List<PostDTO>>(HttpStatus.NOT_FOUND);
+		}else {
+			return new ResponseEntity<List<PostDTO>>(posts, HttpStatus.OK);
 		}
 	}
 }
