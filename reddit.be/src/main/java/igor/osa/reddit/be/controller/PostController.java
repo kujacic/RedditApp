@@ -56,9 +56,9 @@ public class PostController {
 		}
 	}
 	
-	@PutMapping(value = "/{id}")
-	public ResponseEntity<PostDTO> update(@RequestBody PostDTO postDTO, @PathVariable("id") Integer id){
-		Post post = postService.get(id);
+	@PutMapping
+	public ResponseEntity<PostDTO> update(@RequestBody PostDTO postDTO){
+		Post post = postService.get(postDTO.getId());
 		if(post == null) {
 			return new ResponseEntity<PostDTO>(HttpStatus.BAD_REQUEST);
 		}
