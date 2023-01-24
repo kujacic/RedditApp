@@ -3,26 +3,19 @@ package igor.osa.reddit.be.model;
 import java.time.LocalDate;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import static javax.persistence.InheritanceType.SINGLE_TABLE;
 import static javax.persistence.DiscriminatorType.STRING;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity(name = "User")
 @Table(name = "users")
 @Inheritance(strategy = SINGLE_TABLE)
 @DiscriminatorColumn(name = "userType", discriminatorType = STRING)

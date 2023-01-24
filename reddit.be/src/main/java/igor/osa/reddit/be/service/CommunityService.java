@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import igor.osa.reddit.be.model.*;
+import igor.osa.reddit.be.repository.*;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,18 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import igor.osa.reddit.be.dto.CommunityDTO;
-import igor.osa.reddit.be.model.Banned;
-import igor.osa.reddit.be.model.Community;
-import igor.osa.reddit.be.model.Flair;
-import igor.osa.reddit.be.model.Moderator;
-import igor.osa.reddit.be.model.Post;
-import igor.osa.reddit.be.model.Rule;
-import igor.osa.reddit.be.repository.BannedRepository;
-import igor.osa.reddit.be.repository.CommunityRepository;
-import igor.osa.reddit.be.repository.FlairRepository;
-import igor.osa.reddit.be.repository.ModeratorRepository;
-import igor.osa.reddit.be.repository.PostRepository;
-import igor.osa.reddit.be.repository.RuleRepository;
 
 @Service
 public class CommunityService {
@@ -48,6 +38,9 @@ public class CommunityService {
 	
 	@Autowired
 	private FlairRepository flairRepository;
+
+	@Autowired
+	private UserRepository userRepository;
 	
 	@Autowired
 	private ModelMapper mapper;
@@ -74,19 +67,27 @@ public class CommunityService {
 		}
 		return community;
 	}
-	
-	public Community create(CommunityDTO dto) {
+
+	public Community create(CommunityDTO dto, String userName) {
 		Community community = convertToEntity(dto);
 		community.setCreationDate(LocalDate.now().toString());
 		community.setSuspended(false);
 		community.setSuspendedReason("");
+		User user = userRepository.findByUsername(userName);
+		if (user.getUserType().equals("User")) {
+			userRepository.updateUserType("Moderator", user.getId());
+			userRepository.flush();
+		}
+		List<Moderator> moderators = new ArrayList<>();
+		moderators.add(moderatorRepository.findById(user.getId()).orElse(null));
+		community.setModerators(moderators);
 		communityRepository.save(community);
 		LOGGER.info("Successfully created community: {}", community);
 		return community;
 	}
-	
-	public Community update(CommunityDTO communityDTO) {
-			return create(communityDTO);
+
+	public Community update(CommunityDTO communityDTO, String user) {
+			return create(communityDTO, user);
 	}
 	
 	public void delete(Community community) {

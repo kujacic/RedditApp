@@ -1,19 +1,25 @@
 package igor.osa.reddit.be.model;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.List;
 
 @Entity
 @Data
 @EqualsAndHashCode(callSuper = true)
 @DiscriminatorValue("Moderator")
 public class Moderator extends User {
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Community community;
+
+    @ManyToMany(mappedBy = "moderators", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    List<Community> communities;
+
+	public Moderator(){}
+
+	public Moderator(User user, List<Community> communities) {
+		super(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), user.getAvatar(), user.getRegistrationDate(), user.getDescription(), user.getDisplayName(), user.getUserType(), user.getComments(), user.getPosts());
+		this.communities = communities;
+	}
 }

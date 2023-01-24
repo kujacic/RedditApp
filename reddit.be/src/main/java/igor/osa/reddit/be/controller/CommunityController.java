@@ -5,14 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import igor.osa.reddit.be.dto.CommunityDTO;
 import igor.osa.reddit.be.model.Community;
@@ -41,25 +34,25 @@ public class CommunityController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<CommunityDTO> create(@RequestBody CommunityDTO communityDTO){
+	public ResponseEntity<Void> create(@RequestBody CommunityDTO communityDTO, @RequestParam String user ){
 		if (communityService.checkIfCommunityExists(communityDTO)) {
-			return new ResponseEntity<CommunityDTO>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		Community community = communityService.create(communityDTO);
+		Community community = communityService.create(communityDTO, user);
 		if (community == null) {
-			return new ResponseEntity<CommunityDTO>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		} else {
-			return new ResponseEntity<CommunityDTO>(communityService.convertToDTO(community), HttpStatus.OK);
+			return new ResponseEntity<>(HttpStatus.OK);
 		}
 	}
 	
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<CommunityDTO> update(@RequestBody CommunityDTO communityDTO, @PathVariable("id") Integer id){
+	public ResponseEntity<CommunityDTO> update(@RequestBody CommunityDTO communityDTO, @PathVariable("id") Integer id, @RequestParam String user){
 		Community community = communityService.get(id);
 		if(community == null) {
 			return new ResponseEntity<CommunityDTO>(HttpStatus.BAD_REQUEST);
 		}
-		community = communityService.update(communityDTO);
+		community = communityService.update(communityDTO, user);
 		return new ResponseEntity<CommunityDTO>(communityService.convertToDTO(community), HttpStatus.OK);
 	}
 	

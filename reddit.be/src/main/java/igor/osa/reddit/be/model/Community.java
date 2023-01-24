@@ -50,8 +50,11 @@ public class Community {
 	
 	@OneToMany(mappedBy = "community", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Post> posts;
-	
-	@OneToMany(mappedBy = "community", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinTable(name = "community_moderator",
+			joinColumns = @JoinColumn(name = "community_id"),
+			inverseJoinColumns = @JoinColumn(name = "user_id"))
 	private List<Moderator> moderators;
 	
 	@ManyToMany(fetch = FetchType.LAZY)
