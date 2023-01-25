@@ -80,6 +80,7 @@ public class PostService {
 	
 	public PostDTO convertToDTO(Post post) {
 		PostDTO postDTO = mapper.map(post, PostDTO.class);
+		postDTO.setCommunityName(post.getCommunity().getName());
 		postDTO.setAuthor(post.getUser().getUsername());
 		return postDTO;
 	}
