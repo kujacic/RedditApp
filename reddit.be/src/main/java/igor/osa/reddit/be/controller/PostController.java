@@ -87,4 +87,23 @@ public class PostController {
 			return new ResponseEntity<List<PostDTO>>(posts, HttpStatus.OK);
 		}
 	}
+	
+	@GetMapping(value = "/sorted")
+	public ResponseEntity<List<PostDTO>> getAllSorted(@RequestParam(value="sortBy") String sortBy) { 
+		List<PostDTO> posts = postService.getAll();
+		List<PostDTO> sortedPosts = postService.sortPosts(posts, sortBy);
+		return new ResponseEntity<List<PostDTO>>(sortedPosts, HttpStatus.OK);
+	}
+	
+	@GetMapping(value = "/community/sorted")
+	public ResponseEntity<List<PostDTO>> getByCommunity(@RequestParam(value="communityName") String communityName, @RequestParam(value="sortBy") String sortBy) {
+		Community community = communityService.getByName(communityName);
+		List<PostDTO> posts = postService.convertListToDTO(community.getPosts());
+		if(posts == null) {
+			return new ResponseEntity<List<PostDTO>>(HttpStatus.NOT_FOUND);
+		}else {
+			List<PostDTO> sortedPosts = postService.sortPosts(posts, sortBy);
+			return new ResponseEntity<List<PostDTO>>(sortedPosts, HttpStatus.OK);
+		}
+	}
 }

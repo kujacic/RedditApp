@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import igor.osa.reddit.be.dto.ChangePasswordDTO;
 import igor.osa.reddit.be.dto.UserDTO;
 import igor.osa.reddit.be.model.User;
 import igor.osa.reddit.be.repository.UserRepository;
@@ -44,6 +45,14 @@ public class UserService {
 		return user;
 	}
 	
+	public User getByUsername(String username) {
+		User user = userRepository.findByUsername(username);
+		if(user == null) {
+			LOGGER.error("User with username: {} doesn't exist!", username);
+		}
+		return user;
+	}
+	
 	public boolean checkIfUserExists(UserDTO dto) {
 		User existingUsername = userRepository.findByUsername(dto.getUsername());
 		if (existingUsername != null) {
@@ -70,13 +79,34 @@ public class UserService {
 		return user;
 	}
 	
-	public User update(UserDTO userDTO) {
-			return create(userDTO);
+	public User update(UserDTO userDTO, User user) {
+		if(!userDTO.getUsername().equals(user.getUsername())) {
+			if (userRepository.findByUsername(userDTO.getUsername()) != null) {
+				return null;
+			} else {
+				user.setUsername(userDTO.getUsername());
+			}
+		}
+		user.setEmail(userDTO.getEmail());
+		userRepository.save(user);
+		LOGGER.info("Successfully updated user: {}", user);
+		return user;
 	}
 	
 	public void delete(User user) {
 		userRepository.delete(user);
 		LOGGER.info("Successfully deleted user with id: {}", user.getId());
+	}
+	
+	public boolean updatePassword(ChangePasswordDTO dto, String username) {
+		User user = userRepository.findByUsername(username);
+		if(passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+			user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+			userRepository.save(user);
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	//CONVERSIONS

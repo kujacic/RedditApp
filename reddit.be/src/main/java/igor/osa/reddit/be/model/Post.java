@@ -1,6 +1,6 @@
 package igor.osa.reddit.be.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -33,7 +33,7 @@ public class Post {
 	private String text;
 	
 	@Column(name = "creation_date", unique = false, nullable = false)
-	private LocalDate creationDate;
+	private LocalDateTime creationDate;
 	
 	@Column(name = "image_path", unique = false, nullable = true)
 	private String imagePath;

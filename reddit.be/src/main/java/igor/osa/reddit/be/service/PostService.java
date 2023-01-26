@@ -1,7 +1,9 @@
 package igor.osa.reddit.be.service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 import igor.osa.reddit.be.dto.PostDTO;
 import igor.osa.reddit.be.model.Community;
 import igor.osa.reddit.be.model.Post;
+import igor.osa.reddit.be.model.Reaction;
+import igor.osa.reddit.be.model.enums.ReactionType;
 import igor.osa.reddit.be.repository.CommunityRepository;
 import igor.osa.reddit.be.repository.PostRepository;
 import igor.osa.reddit.be.repository.UserRepository;
@@ -52,7 +56,7 @@ public class PostService {
 	
 	public Post create(PostDTO dto) {
 		Post post = convertToEntity(dto);
-		post.setCreationDate(LocalDate.now());
+		post.setCreationDate(LocalDateTime.now());
 		post.setUser(userRepository.findByUsername(dto.getAuthor()));
 		post.setCommunity(communityRepository.findByName(dto.getCommunityName()));
 		postRepository.save(post);
@@ -76,12 +80,51 @@ public class PostService {
 				.collect(Collectors.toList());
 	}
 	
+	public List<PostDTO> sortPosts(List<PostDTO> posts, String sortBy) {
+		if (sortBy.equals("newest")) {
+			posts.sort(Comparator.comparing(PostDTO::getCreationDate).reversed());
+		}
+		else if (sortBy.equals("oldest")) {
+			posts.sort(Comparator.comparing(PostDTO::getCreationDate));
+		}
+		else if (sortBy.equals("topRated")) {
+			posts.sort(Comparator.comparing(PostDTO::getKarma).reversed());
+		}
+		else if (sortBy.equals("lowestRated")) {
+			posts.sort(Comparator.comparing(PostDTO::getKarma));
+		}
+		else if (sortBy.equals("hot")) {
+			long now = System.currentTimeMillis();
+			for (PostDTO dto : posts) {
+				Long timeDiff = now - dto.getCreationDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+				Long hot = dto.getKarma().longValue() / timeDiff;
+				dto.setHotFactor(hot.intValue());
+			}
+			posts.sort(Comparator.comparing(PostDTO::getHotFactor).reversed());
+		}
+		return posts;
+	}
+	
 	//CONVERSIONS
 	
 	public PostDTO convertToDTO(Post post) {
 		PostDTO postDTO = mapper.map(post, PostDTO.class);
 		postDTO.setCommunityName(post.getCommunity().getName());
 		postDTO.setAuthor(post.getUser().getUsername());
+		
+		List<Reaction> allReactions = post.getReactions();
+        if (allReactions != null) {
+        	List<Reaction> upvotes = new ArrayList<>();
+            List<Reaction> downvotes = new ArrayList<>();
+        	for (Reaction reaction : allReactions) {
+                if (reaction.getType().equals(ReactionType.UPVOTE)) {
+                    upvotes.add(reaction);
+                } else if (reaction.getType().equals(ReactionType.DOWNVOTE)) {
+                    downvotes.add(reaction);
+                }
+            }
+    		postDTO.setKarma(upvotes.size() - downvotes.size());
+        }
 		return postDTO;
 	}
 	

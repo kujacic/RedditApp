@@ -1,13 +1,11 @@
 package igor.osa.reddit.be.controller;
 
-import igor.osa.reddit.be.dto.PostDTO;
 import igor.osa.reddit.be.dto.ReactionCountDTO;
 import igor.osa.reddit.be.dto.ReactionDTO;
 import igor.osa.reddit.be.model.Post;
 import igor.osa.reddit.be.model.Reaction;
 import igor.osa.reddit.be.service.PostService;
 import igor.osa.reddit.be.service.ReactionService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

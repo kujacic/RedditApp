@@ -18,8 +18,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import igor.osa.reddit.be.dto.ChangePasswordDTO;
 import igor.osa.reddit.be.dto.UserDTO;
 import igor.osa.reddit.be.model.User;
 import igor.osa.reddit.be.security.TokenUtils;
@@ -57,6 +59,16 @@ public class UserController {
 		}
 	}
 	
+	@GetMapping("/username")
+	public ResponseEntity<UserDTO> get(@RequestParam("username") String username){
+		User user = userService.getByUsername(username);
+		if(user == null) {
+			return new ResponseEntity<UserDTO>(HttpStatus.NOT_FOUND);
+		}else {
+			return new ResponseEntity<UserDTO>(userService.convertToDTO(user), HttpStatus.OK);
+		}
+	}
+	
 	@PostMapping
 	public ResponseEntity<UserDTO> create(@RequestBody UserDTO userDTO){
 		if (userService.checkIfUserExists(userDTO)) {
@@ -70,14 +82,18 @@ public class UserController {
 		}
 	}
 	
-	@PutMapping(value = "/{id}")
-	public ResponseEntity<UserDTO> update(@RequestBody UserDTO userDTO, @PathVariable("id") Integer id){
-		User user = userService.get(id);
+	@PutMapping
+	public ResponseEntity<UserDTO> update(@RequestBody UserDTO userDTO, @RequestParam("username") String username){
+		User user = userService.getByUsername(username);
 		if(user == null) {
 			return new ResponseEntity<UserDTO>(HttpStatus.BAD_REQUEST);
 		}
-		user = userService.update(userDTO);
-		return new ResponseEntity<UserDTO>(userService.convertToDTO(user), HttpStatus.OK);
+		user = userService.update(userDTO, user);
+		if (user != null) {
+			return new ResponseEntity<UserDTO>(userService.convertToDTO(user), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<UserDTO>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@DeleteMapping(value = "/{id}")
@@ -104,4 +120,14 @@ public class UserController {
             return new ResponseEntity<String>("Login failed", HttpStatus.BAD_REQUEST);
         }
     }
+	
+	@PostMapping("/changePassword")
+	public ResponseEntity<Void> updatePassword(@RequestBody ChangePasswordDTO dto, @RequestParam("username") String username) {
+		boolean result = userService.updatePassword(dto, username);
+		if (!result) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		} else {
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+	}
 }
