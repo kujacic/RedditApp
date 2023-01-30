@@ -67,6 +67,15 @@ public class CommunityService {
 		}
 		return community;
 	}
+	
+	public List<Community> getByModerator(String name) {
+		Moderator moderator = moderatorRepository.findByUsername(name);
+		List<Community> communities = moderator.getCommunities();
+		if(communities == null) {
+			LOGGER.error("Communities for moderator: {} don't exist!", name);
+		}
+		return communities;
+	}
 
 	public Community create(CommunityDTO dto, String userName) {
 		Community community = convertToEntity(dto);
@@ -102,6 +111,20 @@ public class CommunityService {
 			return true;
 		}
 		return false;
+	}
+	
+	public void addFlair(String communityName, String flairName) {
+		Community community = getByName(communityName);
+		Flair flair = flairRepository.findByName(flairName);
+		community.getFlairs().add(flair);
+		communityRepository.save(community);
+	}
+	
+	public void removeFlair(String communityName, String flairName) {
+		Community community = getByName(communityName);
+		Flair flair = flairRepository.findByName(flairName);
+		community.getFlairs().remove(flair);
+		communityRepository.save(community);
 	}
 
 	//CONVERSIONS
@@ -160,5 +183,13 @@ public class CommunityService {
 			community.getFlairs().add(flairRepository.findById(id).orElse(null));
 		}
 		return community;
+	}
+	
+	public List<CommunityDTO> convertListToDTO(List<Community> communities) {
+		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
+		for (Community community : communities) {
+			dtos.add(convertToDTO(community));
+		}
+		return dtos;
 	}
 }

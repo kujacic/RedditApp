@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -40,6 +41,10 @@ public class Comment {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Post post;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "parent_id", nullable = true)
+	private Comment comment;
 	
 	@OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Report> reports;

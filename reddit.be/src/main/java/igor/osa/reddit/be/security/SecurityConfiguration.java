@@ -81,8 +81,20 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/community").permitAll()
                 .antMatchers(HttpMethod.POST, "/community/*").permitAll()
                 .antMatchers(HttpMethod.POST, "/community/**/*").permitAll()
+                .antMatchers(HttpMethod.GET, "/reaction/**/*").permitAll()
                 .antMatchers(HttpMethod.GET, "/reaction/*").permitAll()
                 .antMatchers(HttpMethod.POST, "/reaction").permitAll()
+                .antMatchers(HttpMethod.GET, "/comment/*").permitAll()
+                .antMatchers(HttpMethod.DELETE, "/comment/*").permitAll()
+                .antMatchers(HttpMethod.GET, "/comment/**/*").permitAll()
+                .antMatchers(HttpMethod.POST, "/comment").permitAll()
+                .antMatchers(HttpMethod.GET, "/flair/*").permitAll()
+                .antMatchers(HttpMethod.GET, "/rule/*").permitAll()
+                .antMatchers(HttpMethod.POST, "/rule").permitAll()
+                .antMatchers(HttpMethod.PUT, "/rule/*").permitAll()
+                .antMatchers(HttpMethod.DELETE, "/rule/*").permitAll()
+                .antMatchers(HttpMethod.POST, "/report").permitAll()
+                .antMatchers(HttpMethod.GET, "/report").permitAll()
                 .anyRequest().authenticated();
 
         httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);

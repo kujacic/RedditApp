@@ -33,26 +33,6 @@ public class ReactionService {
     @Autowired
     private CommentRepository commentRepository;
 
-    public ReactionCountDTO calculateReactions(Post post, String username) {
-        List<Reaction> allReactions = post.getReactions();
-        List<Reaction> upvotes = new ArrayList<>();
-        List<Reaction> downvotes = new ArrayList<>();
-
-        ReactionCountDTO reactionCountDTO = new ReactionCountDTO();
-        for (Reaction reaction : allReactions) {
-            if (reaction.getUser().getUsername().equals(username)) {
-                reactionCountDTO.setType(String.valueOf(reaction.getType()));
-            }
-            if (reaction.getType().equals(ReactionType.UPVOTE)) {
-                upvotes.add(reaction);
-            } else if (reaction.getType().equals(ReactionType.DOWNVOTE)) {
-                downvotes.add(reaction);
-            }
-        }
-        reactionCountDTO.setCount(upvotes.size() - downvotes.size());
-        return reactionCountDTO;
-    }
-
     public Reaction create(ReactionDTO dto) {
         Reaction reaction = convertToEntity(dto);
         if (reaction.getPost() != null) {
@@ -66,9 +46,69 @@ public class ReactionService {
                 reactionRepository.save(reaction);
             }
         } else if (reaction.getComment() != null) {
-            // TODO
+        	Reaction existing = reactionRepository.findByUserAndComment(reaction.getUser(), reaction.getComment());
+            if (existing != null) {
+                existing.setType(reaction.getType());
+                existing.setTimeStamp(LocalDate.now());
+                reactionRepository.save(existing);
+            }
+            else {
+                reactionRepository.save(reaction);
+            }
         }
         return reaction;
+    }
+    
+    public ReactionCountDTO calculateReactions(Object object, String username) {
+    	List<Reaction> allReactions = new ArrayList<>();
+    	if (object instanceof Post) {
+    		Post post = (Post) object;
+    		allReactions = post.getReactions();
+    	} else {
+    		Comment comment = (Comment) object;
+    		allReactions = comment.getReactions();
+    	}
+        List<Reaction> upvotes = new ArrayList<>();
+        List<Reaction> downvotes = new ArrayList<>();
+
+        ReactionCountDTO reactionCountDTO = new ReactionCountDTO();
+        for (Reaction reaction : allReactions) {
+        	if (username != null) {
+        		if (reaction.getUser().getUsername().equals(username)) {
+                    reactionCountDTO.setType(String.valueOf(reaction.getType()));
+                }
+        	}
+            if (reaction.getType().equals(ReactionType.UPVOTE)) {
+                upvotes.add(reaction);
+            } else if (reaction.getType().equals(ReactionType.DOWNVOTE)) {
+                downvotes.add(reaction);
+            }
+        }
+        reactionCountDTO.setCount(upvotes.size() - downvotes.size());
+        return reactionCountDTO;
+    }
+    
+    public Integer calculateUserKarma(User user) {
+    	List<Reaction> allReactions = new ArrayList<>();
+    	List<Post> userPosts = user.getPosts();
+    	for (Post post : userPosts) {
+    		allReactions.addAll(post.getReactions());
+    	}
+    	List<Comment> userComments = user.getComments();
+    	for (Comment comment : userComments) {
+    		allReactions.addAll(comment.getReactions());
+    	}
+    	
+        List<Reaction> upvotes = new ArrayList<>();
+        List<Reaction> downvotes = new ArrayList<>();
+        for (Reaction reaction : allReactions) {
+            if (reaction.getType().equals(ReactionType.UPVOTE)) {
+            	upvotes.add(reaction);
+            } else if (reaction.getType().equals(ReactionType.DOWNVOTE)) {
+            	downvotes.add(reaction);
+            }
+        }
+        return upvotes.size() - downvotes.size();
     }
 
     public Reaction convertToEntity(ReactionDTO reactionDTO) {

@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*;
 
 import igor.osa.reddit.be.dto.CommunityDTO;
 import igor.osa.reddit.be.model.Community;
+import igor.osa.reddit.be.model.Flair;
 import igor.osa.reddit.be.service.CommunityService;
+import igor.osa.reddit.be.service.FlairService;
 
 @RestController
 @RequestMapping(value = "/community")
@@ -18,9 +20,18 @@ public class CommunityController {
 	@Autowired
 	private CommunityService communityService;
 	
+	@Autowired
+	private FlairService flairService;
+	
 	@GetMapping
 	public ResponseEntity<List<CommunityDTO>> getAll(){ 
 		return new ResponseEntity<List<CommunityDTO>>(communityService.getAll(), HttpStatus.OK);
+	}
+	
+	@GetMapping("/moderator")
+	public ResponseEntity<List<CommunityDTO>> getAllForModerator(@RequestParam("user") String user) { 
+		List<Community> moderatorCommunities = communityService.getByModerator(user);
+		return new ResponseEntity<List<CommunityDTO>>(communityService.convertListToDTO(moderatorCommunities), HttpStatus.OK);
 	}
 	
 	@GetMapping(value = "/{id}")
@@ -65,5 +76,43 @@ public class CommunityController {
 			communityService.delete(community);
 			return new ResponseEntity<Void>(HttpStatus.OK);
 		}
+	}
+	
+	@GetMapping(value = "/flair")
+	public ResponseEntity<List<String>> getFlairsForCommunity(@RequestParam("community") String communityName){
+		Community community = communityService.getByName(communityName);
+		if(community == null) {
+			return new ResponseEntity<List<String>>(HttpStatus.NOT_FOUND);
+		}else {
+			return new ResponseEntity<List<String>>(flairService.getFlairNames(community.getFlairs()), HttpStatus.OK);
+		}
+	}
+	
+	@GetMapping(value = "/flair/missing")
+	public ResponseEntity<List<String>> getFlairsMissingForCommunity(@RequestParam("community") String communityName){
+		Community community = communityService.getByName(communityName);
+		if(community == null) {
+			return new ResponseEntity<List<String>>(HttpStatus.NOT_FOUND);
+		}else {
+			List<Flair> allFlairs = flairService.getAll();
+			for (Flair flair : community.getFlairs()) {
+				if (allFlairs.contains(flair)) {
+					allFlairs.remove(flair);
+				}
+			}
+			return new ResponseEntity<List<String>>(flairService.getFlairNames(allFlairs), HttpStatus.OK);
+		}
+	}
+	
+	@PostMapping(value = "/flair/add")
+	public ResponseEntity<Void> addFLair(@RequestParam("community") String communityName, @RequestParam("flair") String flairName){
+		communityService.addFlair(communityName, flairName);
+		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+	
+	@PostMapping(value = "/flair/remove")
+	public ResponseEntity<Void> removeFLair(@RequestParam("community") String communityName, @RequestParam("flair") String flairName){
+		communityService.removeFlair(communityName, flairName);
+		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 }

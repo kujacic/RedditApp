@@ -87,6 +87,7 @@ public class UserService {
 				user.setUsername(userDTO.getUsername());
 			}
 		}
+		user.setDisplayName(userDTO.getDisplayName());
 		user.setEmail(userDTO.getEmail());
 		userRepository.save(user);
 		LOGGER.info("Successfully updated user: {}", user);
@@ -113,6 +114,11 @@ public class UserService {
 	
 	public UserDTO convertToDTO(User user) {
 		UserDTO userDTO = mapper.map(user, UserDTO.class);
+		if (user.getUserType().equals("Moderator")) {
+			userDTO.setIsModerator(true);
+		} else {
+			userDTO.setIsModerator(false);
+		}
 		return userDTO;
 	}
 	

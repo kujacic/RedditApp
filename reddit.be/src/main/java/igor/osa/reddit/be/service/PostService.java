@@ -1,5 +1,6 @@
 package igor.osa.reddit.be.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -14,11 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import igor.osa.reddit.be.dto.PostDTO;
+import igor.osa.reddit.be.dto.ReactionDTO;
 import igor.osa.reddit.be.model.Community;
 import igor.osa.reddit.be.model.Post;
 import igor.osa.reddit.be.model.Reaction;
 import igor.osa.reddit.be.model.enums.ReactionType;
 import igor.osa.reddit.be.repository.CommunityRepository;
+import igor.osa.reddit.be.repository.FlairRepository;
 import igor.osa.reddit.be.repository.PostRepository;
 import igor.osa.reddit.be.repository.UserRepository;
 
@@ -35,6 +38,12 @@ public class PostService {
 	
 	@Autowired
 	private CommunityRepository communityRepository;
+	
+	@Autowired
+	private FlairRepository flairRepository;
+	
+	@Autowired
+	private ReactionService reactionService;
 	
 	@Autowired
 	private ModelMapper mapper;
@@ -59,7 +68,13 @@ public class PostService {
 		post.setCreationDate(LocalDateTime.now());
 		post.setUser(userRepository.findByUsername(dto.getAuthor()));
 		post.setCommunity(communityRepository.findByName(dto.getCommunityName()));
-		postRepository.save(post);
+		post.setFlair(flairRepository.findByName(dto.getFlair()));
+		Post saved = postRepository.save(post);
+		List<Reaction> reactions = new ArrayList<>();
+		Reaction autoUpvote = reactionService.create(new ReactionDTO(null, ReactionType.UPVOTE, post.getUser().getUsername(), saved.getId(), null, LocalDate.now()));
+		reactions.add(autoUpvote);
+		post.setReactions(reactions);
+		postRepository.save(saved);
 		LOGGER.info("Successfully created post: {}", post);
 		return post;
 	}
@@ -111,6 +126,12 @@ public class PostService {
 		PostDTO postDTO = mapper.map(post, PostDTO.class);
 		postDTO.setCommunityName(post.getCommunity().getName());
 		postDTO.setAuthor(post.getUser().getUsername());
+		if (post.getUser().getDisplayName() != null) {
+			postDTO.setAuthorDisplayName(post.getUser().getDisplayName());
+		}
+		if (post.getFlair() != null) {
+			postDTO.setFlair(post.getFlair().getName());
+		}
 		
 		List<Reaction> allReactions = post.getReactions();
         if (allReactions != null) {

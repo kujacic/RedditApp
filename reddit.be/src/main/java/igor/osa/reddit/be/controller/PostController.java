@@ -19,6 +19,7 @@ import igor.osa.reddit.be.dto.PostDTO;
 import igor.osa.reddit.be.model.Community;
 import igor.osa.reddit.be.model.Post;
 import igor.osa.reddit.be.service.CommunityService;
+import igor.osa.reddit.be.service.FlairService;
 import igor.osa.reddit.be.service.PostService;
 
 @RestController
@@ -30,6 +31,9 @@ public class PostController {
 	
 	@Autowired
 	private CommunityService communityService;
+	
+	@Autowired
+	private FlairService flairService;
 	
 	@GetMapping
 	public ResponseEntity<List<PostDTO>> getAll(){ 
@@ -104,6 +108,17 @@ public class PostController {
 		}else {
 			List<PostDTO> sortedPosts = postService.sortPosts(posts, sortBy);
 			return new ResponseEntity<List<PostDTO>>(sortedPosts, HttpStatus.OK);
+		}
+	}
+	
+	@GetMapping(value = "/flair")
+	public ResponseEntity<List<String>> getFlairsForPost(@RequestParam("postId") String postId){
+		Post post = postService.get(Integer.valueOf(postId));
+		if(post == null) {
+			return new ResponseEntity<List<String>>(HttpStatus.NOT_FOUND);
+		}else {
+			Community community = post.getCommunity();
+			return new ResponseEntity<List<String>>(flairService.getFlairNames(community.getFlairs()), HttpStatus.OK);
 		}
 	}
 }

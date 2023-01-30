@@ -16,4 +16,5 @@ public class UserDTO {
 	private String description;
 	private String displayName;
 	private String userType;
+	private Boolean isModerator;
 }

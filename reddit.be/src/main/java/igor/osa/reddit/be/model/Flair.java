@@ -11,7 +11,11 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Data
 @Entity
@@ -27,5 +31,8 @@ public class Flair {
 	private String name;
 	
 	@ManyToMany(mappedBy = "flairs", fetch = FetchType.LAZY)
+	@JsonIgnore
+	@ToString.Exclude
+	@EqualsAndHashCode.Exclude
 	private List<Community> communities;
 }
