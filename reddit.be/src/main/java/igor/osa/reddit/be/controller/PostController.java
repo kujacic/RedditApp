@@ -66,7 +66,7 @@ public class PostController {
 		if(post == null) {
 			return new ResponseEntity<PostDTO>(HttpStatus.BAD_REQUEST);
 		}
-		post = postService.update(postDTO);
+		post = postService.update(postDTO, post);
 		return new ResponseEntity<PostDTO>(postService.convertToDTO(post), HttpStatus.OK);
 	}
 	

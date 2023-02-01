@@ -78,9 +78,14 @@ public class PostService {
 		LOGGER.info("Successfully created post: {}", post);
 		return post;
 	}
-	
-	public Post update(PostDTO postDTO) {
-			return create(postDTO);
+
+	public Post update(PostDTO postDTO, Post post) {
+		post.setTitle(postDTO.getTitle());
+		post.setText(postDTO.getText());
+		post.setFlair(flairRepository.findByName(postDTO.getFlair()));
+		postRepository.save(post);
+		LOGGER.info("Successfully created post: {}", post);
+		return post;
 	}
 	
 	public void delete(Post post) {
